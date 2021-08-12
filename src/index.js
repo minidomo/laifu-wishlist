@@ -113,7 +113,8 @@ client.on('messageCreate', async message => {
                 if (userIds.length > 0) {
                     const usersEmbed = new MessageEmbed()
                         .setTitle('Users that may be interested')
-                        .setDescription(userIds.map(id => `<@!${id}>`).join(' '));
+                        .setDescription(userIds.map(id => `<@!${id}>`).join(' '))
+                        .setFooter('Developed by JB#9224');
                     await message.reply({ embeds: [usersEmbed] });
                 }
             }
