@@ -105,7 +105,29 @@ client.on('messageCreate', async message => {
     } else if (message.author.id === laifu.id) {
         if (message.embeds.length === 1) {
             const [embed] = message.embeds;
-            if (laifu.embed.isGacha(embed) || laifu.embed.isView(embed) || laifu.embed.isBurn(embed)) {
+            if (laifu.embed.isView(embed) || laifu.embed.isBurn(embed)) {
+                const gid = laifu.embed.getGID(embed);
+                const cardNumber = laifu.embed.getCardNumber(embed);
+                const sid = laifu.embed.getSID(embed);
+                const userIds = database.search(gid, sid, cardNumber);
+                if (userIds.length > 0) {
+                    const usersEmbed = new MessageEmbed()
+                        .setTitle('Users that may be interested')
+                        .setDescription(userIds.map(id => `<@!${id}>`).join(' '))
+                        .setFooter('Developed by JB#9224');
+                    await message.reply({ embeds: [usersEmbed] });
+                }
+            }
+        }
+    }
+});
+
+client.on('messageUpdate', async message => {
+    if (!client.application?.owner) await client.application?.fetch();
+    if (message.author.id === laifu.id) {
+        if (message.embeds.length === 1) {
+            const [embed] = message.embeds;
+            if (laifu.embed.isGacha(embed)) {
                 const gid = laifu.embed.getGID(embed);
                 const cardNumber = laifu.embed.getCardNumber(embed);
                 const sid = laifu.embed.getSID(embed);
