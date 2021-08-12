@@ -22,27 +22,27 @@ const query = async (client, category, userId, page) => {
             const upperBound = LIMIT_PER_PAGE * page - 1;
             const lowerBound = LIMIT_PER_PAGE * (page - 1);
             let index = 0;
-            if (category.value === 'gid') {
+            if (category === 'gid') {
                 const it = queryResult.gids.entries();
                 while (index <= upperBound) {
                     const obj = it.next();
                     if (obj.done) break;
-                    index++;
                     if (index >= lowerBound) {
                         const [gid, ids] = obj.value;
                         res += `${gid} - ${[...ids].join('')}\n`;
                     }
+                    index++;
                 }
             } else {
                 const it = queryResult.sids.values();
                 while (index <= upperBound) {
                     const obj = it.next();
                     if (obj.done) break;
-                    index++;
                     if (index >= lowerBound) {
                         const sid = obj.value;
                         res += `${sid}\n`;
                     }
+                    index++;
                 }
             }
             return res.trim();
