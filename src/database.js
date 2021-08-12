@@ -1,4 +1,5 @@
 const fs = require('fs');
+const jsonpack = require('jsonpack');
 
 /**
  * @typedef {Object} DatabaseValue
@@ -10,11 +11,19 @@ const fs = require('fs');
  * @type {Map<string,DatabaseValue}
  */
 const database = (() => {
-    const raw = require('../data/wishlist.json');
+    const loc = './data/wishlist-packed.txt';
+    let data;
+    if (fs.existsSync(loc)) {
+        const raw = fs.readFileSync(loc, { encoding: 'utf-8' });
+        data = jsonpack.unpack(raw);
+    } else {
+        console.log('Created wishlist data');
+        return new Map();
+    }
 
     const map = new Map();
 
-    raw.forEach((e) => {
+    data.forEach((e) => {
         const val = {
             gids: new Map(),
             sids: new Set(),
@@ -26,7 +35,7 @@ const database = (() => {
         map.set(e.userId, val);
     });
 
-    console.log('Loaded wishlist.json');
+    console.log('Loaded wishlist data');
 
     return map;
 })();
@@ -47,7 +56,8 @@ module.exports = {
             });
             arr.push(obj);
         });
-        fs.writeFileSync('./data/wishlist.json', JSON.stringify(arr, null, 4), { encoding: 'utf-8' });
+        const packed = jsonpack.pack(arr);
+        fs.writeFileSync('./data/wishlist-packed.txt', packed, { encoding: 'utf-8' });
         console.log('Overwrote wishlist data');
     },
     /**
