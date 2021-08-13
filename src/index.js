@@ -52,10 +52,12 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 const laifu = require('./laifu');
 const database = require('./database');
 const config = require('../config.json');
+const wait = require('util').promisify(setTimeout);
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
     loadCommands();
+    setInterval(database.export, 1000 * 60 * 10);
 });
 
 client.on('interactionCreate', async interaction => {
@@ -125,22 +127,27 @@ client.on('messageCreate', async message => {
 client.on('messageUpdate', async message => {
     if (!client.application?.owner) await client.application?.fetch();
     if (message.author.id === laifu.id) {
-        if (message.embeds.length === 1) {
-            const [embed] = message.embeds;
-            if (laifu.embed.isGacha(embed)) {
-                const gid = laifu.embed.getGID(embed);
-                const cardNumber = laifu.embed.getCardNumber(embed);
-                const sid = laifu.embed.getSID(embed);
-                const userIds = database.search(gid, sid, cardNumber);
-                if (userIds.length > 0) {
-                    const usersEmbed = new MessageEmbed()
-                        .setTitle('Users that may be interested')
-                        .setDescription(userIds.map(id => `<@!${id}>`).join(' '))
-                        .setFooter('Developed by JB#9224');
-                    await message.reply({ embeds: [usersEmbed] });
+        wait(1000)
+            .then(async () => {
+                const msg = await message.channel.messages.fetch(message.id);
+                if (msg.embeds.length === 1) {
+                    const [embed] = msg.embeds;
+                    if (laifu.embed.isGacha(embed)) {
+                        const gid = laifu.embed.getGID(embed);
+                        const cardNumber = laifu.embed.getCardNumber(embed);
+                        const sid = laifu.embed.getSID(embed);
+                        const userIds = database.search(gid, sid, cardNumber);
+                        if (userIds.length > 0) {
+                            const usersEmbed = new MessageEmbed()
+                                .setTitle('Users that may be interested')
+                                .setDescription(userIds.map(id => `<@!${id}>`).join(' '))
+                                .setFooter('Developed by JB#9224');
+                            await msg.reply({ embeds: [usersEmbed] });
+                        }
+                    }
                 }
-            }
-        }
+            })
+            .catch(console.error);
     }
 });
 
