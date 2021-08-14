@@ -54,10 +54,15 @@ const database = require('./database');
 const config = require('../config.json');
 const wait = require('util').promisify(setTimeout);
 
+const gachaMessageIds = new Set();
+
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
     loadCommands();
-    setInterval(database.export, 1000 * 60 * 10);
+    setInterval(() => {
+        database.export();
+        gachaMessageIds.clear();
+    }, 1000 * 60 * 10);
 });
 
 client.on('interactionCreate', async interaction => {
@@ -129,6 +134,8 @@ client.on('messageUpdate', async message => {
     if (message.author.id === laifu.id) {
         wait(1000)
             .then(async () => {
+                if (gachaMessageIds.has(message.id)) return;
+                gachaMessageIds.add(message.id);
                 const msg = await message.channel.messages.fetch(message.id);
                 if (msg.embeds.length === 1) {
                     const [embed] = msg.embeds;
