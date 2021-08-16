@@ -50,7 +50,8 @@ const client = new Client({ intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_
 })();
 
 const laifu = require('./laifu');
-const database = require('./database');
+const WishlistData = require('./WishlistData');
+const LaifuData = require('./LaifuData');
 const config = require('../config.json');
 const wait = require('util').promisify(setTimeout);
 
@@ -60,8 +61,9 @@ client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
     loadCommands();
     setInterval(() => {
-        database.export();
+        WishlistData.export();
         gachaMessageIds.clear();
+        LaifuData.load();
     }, 1000 * 60 * 10);
 });
 
@@ -104,7 +106,7 @@ client.on('messageCreate', async message => {
                     break;
                 }
                 case 'export': {
-                    database.export();
+                    WishlistData.export();
                     break;
                 }
             }
@@ -116,7 +118,7 @@ client.on('messageCreate', async message => {
                 const gid = laifu.embed.getGID(embed);
                 const cardNumber = laifu.embed.getCardNumber(embed);
                 const sid = laifu.embed.getSID(embed);
-                const userIds = database.search(gid, sid, cardNumber);
+                const userIds = WishlistData.search(gid, sid, cardNumber);
                 if (userIds.length > 0) {
                     const usersEmbed = new MessageEmbed()
                         .setTitle('Users that may be interested')
@@ -143,7 +145,7 @@ client.on('messageUpdate', async message => {
                         const gid = laifu.embed.getGID(embed);
                         const cardNumber = laifu.embed.getCardNumber(embed);
                         const sid = laifu.embed.getSID(embed);
-                        const userIds = database.search(gid, sid, cardNumber);
+                        const userIds = WishlistData.search(gid, sid, cardNumber);
                         if (userIds.length > 0) {
                             const usersEmbed = new MessageEmbed()
                                 .setTitle('Users that may be interested')
@@ -207,6 +209,6 @@ const deploy = {
 process.on('SIGKILL', process.exit);
 process.on('SIGINT', process.exit);
 process.on('exit', () => {
-    database.export();
+    WishlistData.export();
     console.log('Shutting down');
 });

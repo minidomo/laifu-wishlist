@@ -1,4 +1,4 @@
-const database = require('../database');
+const WishlistData = require('../WishlistData');
 
 module.exports = {
     name: 'add',
@@ -7,7 +7,7 @@ module.exports = {
         const data = interaction.options.data;
         const [category, id] = data;
         const cardNumbers = data.length === 2 ? '123456789' : data[2].value;
-        database.add(interaction.member.id, category.value, id.value, cardNumbers);
+        WishlistData.add(interaction.member.id, category.value, id.value, cardNumbers);
         let ret = 'Added ';
         if (category.value === 'gid') {
             ret += `GID ${id.value} - Card Numbers: ${cardNumbers}`;

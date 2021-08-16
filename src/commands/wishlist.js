@@ -1,5 +1,6 @@
 const Discord = require('discord.js');
-const database = require('../database');
+const WishlistData = require('../WishlistData');
+const LaifuData = require('../LaifuData');
 
 /**
  * @param {Discord.Client} client
@@ -9,7 +10,7 @@ const database = require('../database');
  * @returns {Promise<Discord.MessageOptions>}
  */
 const query = async (client, category, userId, page) => {
-    const queryResult = database.query(userId);
+    const queryResult = WishlistData.query(userId);
     if (queryResult === null) {
         return { content: `No user was found with the id: ${userId}` };
     }
@@ -29,7 +30,14 @@ const query = async (client, category, userId, page) => {
                     if (obj.done) break;
                     if (index >= lowerBound) {
                         const [gid, ids] = obj.value;
-                        res += `${gid} - ${[...ids].join('')}\n`;
+                        const result = LaifuData.queryCharacter({ gid: gid });
+                        let value;
+                        if (result.length > 0) {
+                            value = `${result[0].gid} | ${result[0].name}`;
+                        } else {
+                            value = gid;
+                        }
+                        res += `${value} - ${[...ids].join('')}\n`;
                     }
                     index++;
                 }
@@ -40,7 +48,14 @@ const query = async (client, category, userId, page) => {
                     if (obj.done) break;
                     if (index >= lowerBound) {
                         const sid = obj.value;
-                        res += `${sid}\n`;
+                        const result = LaifuData.querySeries({ sid: sid });
+                        let value;
+                        if (result.length > 0) {
+                            value = `${result[0].sid} | ${result[0].eng}`;
+                        } else {
+                            value = sid;
+                        }
+                        res += `${value}\n`;
                     }
                     index++;
                 }
