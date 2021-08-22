@@ -48,7 +48,7 @@ module.exports = {
     */
     getSID(embed) {
         const field = embed.fields.find(e => e.name === 'Main Series');
-        const REGEX = /.*\*\*SID:\*\* (\d+).*/;
+        const REGEX = /.*\*\*(?:SID|Series ID):\*\* (\d+).*/;
         const [, sid] = REGEX.exec(field.value);
         return parseInt(sid);
     },
