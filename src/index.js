@@ -115,16 +115,21 @@ client.on('messageCreate', async message => {
         if (message.embeds.length === 1) {
             const [embed] = message.embeds;
             if (laifu.embed.isView(embed) || laifu.embed.isBurn(embed)) {
-                const gid = laifu.embed.getGID(embed);
-                const cardNumber = laifu.embed.getCardNumber(embed);
-                const sid = laifu.embed.getSID(embed);
-                const userIds = WishlistData.search(gid, sid, cardNumber);
-                if (userIds.length > 0) {
-                    const usersEmbed = new MessageEmbed()
-                        .setTitle('Users that may be interested')
-                        .setDescription(userIds.map(id => `<@!${id}>`).join(' '))
-                        .setFooter('Developed by JB#9224');
-                    await message.reply({ embeds: [usersEmbed] });
+                try {
+                    const gid = laifu.embed.getGID(embed);
+                    const cardNumber = laifu.embed.getCardNumber(embed);
+                    const sid = laifu.embed.getSID(embed);
+                    const userIds = WishlistData.search(gid, sid, cardNumber);
+                    if (userIds.length > 0) {
+                        const usersEmbed = new MessageEmbed()
+                            .setTitle('Users that may be interested')
+                            .setDescription(userIds.map(id => `<@!${id}>`).join(' '))
+                            .setFooter('Developed by JB#9224');
+                        await message.reply({ embeds: [usersEmbed] });
+                    }
+                } catch (err) {
+                    console.log(embed);
+                    console.error(err);
                 }
             }
         }
@@ -206,7 +211,6 @@ const deploy = {
     },
 };
 
-process.on('SIGKILL', process.exit);
 process.on('SIGINT', process.exit);
 process.on('exit', () => {
     WishlistData.export();
