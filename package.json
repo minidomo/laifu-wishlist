@@ -2,23 +2,29 @@
   "name": "laifu-wishlist",
   "version": "1.0.0",
   "description": "",
-  "main": "./src/index.js",
+  "main": "src/index.js",
   "scripts": {
-    "start:dev": "node -r dotenv/config ./src/index.js",
-    "start:prod": "node -r dotenv/config ./src/index.js --production",
-    "lint": "eslint ./src/index.js",
-    "clean:logs": "del /S /Q .\\logs\\*.log"
+    "start:dev": "node -r dotenv/config src/index.js",
+    "start:prod": "node -r dotenv/config src/index.js --production",
+    "lint": "eslint src/**",
+    "clean:logs": "trash *.log",
+    "commands:dev": "node -r dotenv/config src/deploy-commands.js",
+    "commands:prod": "node -r dotenv/config src/deploy-commands.js --production"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "dayjs": "^1.10.6",
-    "discord.js": "^13.1.0",
+    "@discordjs/builders": "^0.11.0",
+    "@discordjs/rest": "^0.2.0-canary.0",
+    "dayjs": "^1.10.7",
+    "discord-api-types": "^0.26.1",
+    "discord.js": "^13.5.1",
     "dotenv": "^10.0.0",
     "jsonpack": "^1.1.5",
+    "laifu-util": "github:minidomo/laifu-util",
     "winston": "^3.3.3"
   },
   "devDependencies": {
-    "eslint": "^7.32.0"
+    "eslint": "^8.6.0"
   }
 }

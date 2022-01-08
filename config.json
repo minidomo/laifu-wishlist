@@ -1,0 +1,21 @@
+{
+    "database": {
+        "laifu": {
+            "path": "../laifu-data-gatherer/data/characters-packed.txt"
+        },
+        "wishlist": {
+            "path": "./data/wishlist-packed.txt"
+        }
+    },
+    "logs": {
+        "dir": "./logs"
+    },
+    "guilds": {
+        "dev": [
+            "263901367234592768"
+        ],
+        "prod": [
+            "327301554233278465"
+        ]
+    }
+}

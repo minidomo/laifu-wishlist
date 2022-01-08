@@ -1,5 +1,8 @@
+'use strict';
+
 const fs = require('fs');
 const jsonpack = require('jsonpack');
+const config = require('../config.json');
 
 /**
  * @typedef {Object} DatabaseValue
@@ -8,10 +11,10 @@ const jsonpack = require('jsonpack');
  */
 
 /**
- * @type {Map<string,DatabaseValue}
+ * @returns {Map<string,DatabaseValue}
  */
-const database = (() => {
-    const loc = './data/wishlist-packed.txt';
+const load = () => {
+    const loc = config.database.wishlist.path;
     let data;
     if (fs.existsSync(loc)) {
         const raw = fs.readFileSync(loc, { encoding: 'utf-8' });
@@ -23,7 +26,7 @@ const database = (() => {
 
     const map = new Map();
 
-    data.forEach((e) => {
+    data.forEach(e => {
         const val = {
             gids: new Map(),
             sids: new Set(),
@@ -38,7 +41,9 @@ const database = (() => {
     console.log('Loaded wishlist data');
 
     return map;
-})();
+};
+
+const database = load();
 
 module.exports = {
     export() {
@@ -57,7 +62,12 @@ module.exports = {
             arr.push(obj);
         });
         const packed = jsonpack.pack(arr);
-        fs.writeFileSync('./data/wishlist-packed.txt', packed, { encoding: 'utf-8' });
+        const path = config.database.wishlist.path;
+        const directoryPath = path.substring(0, path.lastIndexOf('/'));
+        if (!fs.existsSync(directoryPath)) {
+            fs.mkdirSync(directoryPath, { recursive: true });
+        }
+        fs.writeFileSync(path, packed, { encoding: 'utf-8' });
         console.log('Overwrote wishlist data');
     },
     /**

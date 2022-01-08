@@ -1,13 +1,38 @@
-const WishlistData = require('../WishlistData');
+'use strict';
+
+const Builders = require('@discordjs/builders');
+const wishlistDatabase = require('../wishlist-database');
 
 module.exports = {
-    name: 'remove',
-    description: 'Remove a character or series from your wishlist',
+    data: new Builders.SlashCommandBuilder()
+        .setName('remove')
+        .setDescription('Remove a character or series from your wishlist')
+        .addStringOption(option =>
+            option.setName('category')
+                .setDescription('The category to be removed')
+                .setRequired(true)
+                .setChoices([
+                    ['Character', 'gid'],
+                    ['Series', 'sid'],
+                ]),
+        )
+        .addIntegerOption(option =>
+            option.setName('id')
+                .setDescription('The id of the character/series')
+                .setRequired(true),
+        )
+        .addStringOption(option =>
+            option.setName('card_numbers')
+                .setDescription('The card numbers to remove. Only type the numbers (no spaces).'
+                    + ' All numbers are removed by default.')
+                .setRequired(false),
+        )
+        .setDefaultPermission(true),
     async execute(interaction) {
         const data = interaction.options.data;
         const [category, id] = data;
         const cardNumbers = data.length === 2 ? '123456789' : data[2].value;
-        WishlistData.remove(interaction.member.id, category.value, id.value, cardNumbers);
+        wishlistDatabase.remove(interaction.member.id, category.value, id.value, cardNumbers);
         let ret = 'Removed ';
         if (category.value === 'gid') {
             ret += `GID ${id.value} - Card Numbers: ${cardNumbers}`;

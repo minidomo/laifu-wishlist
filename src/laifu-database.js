@@ -1,3 +1,5 @@
+'use strict';
+
 const fs = require('fs');
 const jsonpack = require('jsonpack');
 const config = require('../config.json');
@@ -51,6 +53,19 @@ const config = require('../config.json');
  */
 
 /**
+ * @param {Character} character
+ * @returns {boolean}
+ */
+const assertValidCharacter = character => {
+    const validGid = typeof character.gid === 'number';
+    const validName = typeof character.name === 'string';
+    const validSeriesEng = typeof character.series?.eng === 'string';
+    const validSeriesJp = typeof character.series?.jp === 'string';
+    const validSeriesSid = typeof character.series?.sid === 'number';
+    return validGid && validName && validSeriesEng && validSeriesJp && validSeriesSid;
+};
+
+/**
  * @returns {Database}
  */
 const load = () => {
@@ -59,7 +74,7 @@ const load = () => {
         series: new Map(),
     };
 
-    const loc = config.laifu.data.loc;
+    const loc = config.database.laifu.path;
     if (fs.existsSync(loc)) {
         const raw = fs.readFileSync(loc, { encoding: 'utf-8' });
         /**
@@ -80,15 +95,12 @@ const load = () => {
         });
         console.log('Loaded characters file');
     } else {
-        console.log('Could not load characters file');
+        console.log('Could not load file');
     }
 
     return obj;
 };
 
-/**
- * @type {Database}
- */
 let database = load();
 
 module.exports = {
@@ -99,6 +111,10 @@ module.exports = {
      * @param {Character} character
      */
     add(character) {
+        if (!assertValidCharacter(character)) {
+            console.log(character);
+            return;
+        }
         this.remove(character);
         const copy = {
             gid: character.gid,
@@ -124,6 +140,10 @@ module.exports = {
      * @param {Character} character
      */
     remove(character) {
+        if (!assertValidCharacter(character)) {
+            console.log(character);
+            return;
+        }
         const copy = {
             gid: character.gid,
             name: character.name.trim(),
@@ -195,5 +215,28 @@ module.exports = {
      */
     seriesCount() {
         return database.series.size;
+    },
+    /**
+     * @returns {Character[]}
+     */
+    characters() {
+        const ret = [];
+        const it = database.characters.values();
+        for (let cur = it.next(); !cur.done; cur = it.next()) {
+            const deepClone = JSON.parse(JSON.stringify(cur.value));
+            ret.push(deepClone);
+        }
+        return ret;
+    },
+    /**
+     * @returns {number[]}
+     */
+    gids() {
+        const ret = [];
+        const it = database.characters.keys();
+        for (let cur = it.next(); !cur.done; cur = it.next()) {
+            ret.push(cur.value);
+        }
+        return ret;
     },
 };
