@@ -68,7 +68,7 @@ const generateDescription = (queryResult, category, page) => {
             } else {
                 value = sid;
             }
-            return value + '\n';
+            return `${value}\n`;
         };
     }
 
