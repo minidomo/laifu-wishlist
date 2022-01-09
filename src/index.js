@@ -60,6 +60,19 @@ const laifuFunction = async message => {
                 ],
             });
         }
+    } else if (Identifier.isWishlistEmbed(embed)) {
+        const res = Laifu.EmbedParser.parseWishlistEmbed(embed);
+        if (res.username) {
+            message.guild.members.fetch({ query: res.username, limit: 1 })
+                .then(users => {
+                    const user = users.first();
+                    if (!res.charactersWanted || !user) return;
+                    res.characters.forEach(character => {
+                        wishlistDatabase.add(user.id, 'gid', character.gid, '123456789');
+                    });
+                })
+                .catch(console.error);
+        }
     }
 };
 

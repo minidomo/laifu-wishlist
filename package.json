@@ -7,9 +7,11 @@
     "start:dev": "node -r dotenv/config src/index.js",
     "start:prod": "node -r dotenv/config src/index.js --production",
     "lint": "eslint src/**",
-    "clean:logs": "trash *.log",
+    "lint:fix": "eslint src/** --fix",
+    "clean:logs": "trash logs/*.log",
     "commands:dev": "node -r dotenv/config src/deploy-commands.js",
-    "commands:prod": "node -r dotenv/config src/deploy-commands.js --production"
+    "commands:prod": "node -r dotenv/config src/deploy-commands.js --production",
+    "commands:all": "npm run commands:dev && npm run commands:prod"
   },
   "author": "",
   "license": "ISC",

@@ -2,6 +2,7 @@
 
 const Discord = require('discord.js');
 const Builders = require('@discordjs/builders');
+const Laifu = require('laifu-util');
 const wishlistDatabase = require('../wishlist-database');
 const laifuDatabase = require('../laifu-database');
 
@@ -48,9 +49,9 @@ const generateDescription = (queryResult, category, page) => {
             const result = laifuDatabase.queryCharacter({ gid: gid });
             let value;
             if (result.length > 0) {
-                value = `${result[0].gid} | ${result[0].name}`;
+                value = `${gid} | ${Laifu.Util.cleanCharacterName(result[0].name)}`;
             } else {
-                value = gid;
+                value = `${gid} |`;
             }
             return `${value} - ${[...ids].join('')}\n`;
         };
@@ -64,7 +65,7 @@ const generateDescription = (queryResult, category, page) => {
             const result = laifuDatabase.querySeries({ sid: sid });
             let value;
             if (result.length > 0) {
-                value = `${result[0].sid} | ${result[0].eng}`;
+                value = `${sid} | ${result[0].eng}`;
             } else {
                 value = sid;
             }
