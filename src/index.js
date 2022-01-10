@@ -27,11 +27,11 @@ const laifuFunction = async message => {
         const gid = Laifu.Character.getGid(embed);
         const cardNumber = Laifu.Character.getCardNumber(embed);
         const sid = Laifu.Character.getSid(embed);
-        const userIds = wishlistDatabase.search(gid, sid, cardNumber);
+        const userIds = wishlistDatabase.search({ gid, sid, cardNumber });
         if (userIds.length > 0) {
             const usersEmbed = new Discord.MessageEmbed()
                 .setTitle('Users that may be interested')
-                .setDescription(userIds.map(id => `<@!${id}>`).join(' '))
+                .setDescription(userIds.map(id => `<@${id}>`).join(' '))
                 .setFooter({ text: 'Developed by JB#9224' })
                 .setColor('RANDOM');
             await message.reply({
