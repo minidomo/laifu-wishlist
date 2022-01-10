@@ -18,7 +18,7 @@ const MAX_IDS = 20;
  */
 const parseIds = str =>
     str
-        .split(/,+/)
+        .split(/\s+/)
         .map(e => e.trim())
         .filter(e => e.length > 0 && e.match(idsRegex))
         .map(e => {
@@ -73,11 +73,12 @@ module.exports = {
                 .addStringOption(option =>
                     option
                         .setRequired(true)
-                        .setDescription(`The IDs of the characters/series. Can add at most ${MAX_IDS} IDs at once.`)
+                        .setDescription(`The IDs of the characters/series. Can add at most ${MAX_IDS} IDs at once.`
+                            + ` Format:<id>.<card_numbers>`)
                         .setName('ids'))
                 .setDescription('Add multiple entries')
                 .setName('multiple'))
-        .setDefaultPermission(false),
+        .setDefaultPermission(true),
     /**
      * @param {import('discord.js').CommandInteraction} interaction
      */
