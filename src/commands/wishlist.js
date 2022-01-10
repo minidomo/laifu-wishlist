@@ -113,7 +113,7 @@ const generatePageOptions = (queryResult, category) => {
  * @returns {Promise<Discord.MessageOptions>}
  */
 const query = async (client, category, userId, page) => {
-    const queryResult = wishlistDatabase.query(userId);
+    const queryResult = wishlistDatabase.query({ userId });
     if (queryResult === null) {
         return { content: `No user was found with the id: ${userId}` };
     }
@@ -144,32 +144,32 @@ module.exports = {
         .setName('wishlist')
         .setDescription('Shows a user\'s wishlist')
         .addStringOption(option =>
-            option.setName('category')
+            option
+                .setName('category')
                 .setDescription('The category to display')
                 .setRequired(true)
                 .addChoices([
                     ['Characters', 'gid'],
                     ['Series', 'sid'],
-                ]),
-        )
+                ]))
         .addUserOption(option =>
-            option.setName('user')
+            option
+                .setName('user')
                 .setDescription(`See a user's wishlist. Defaults to your own wishlist.`)
-                .setRequired(false),
-        )
+                .setRequired(false))
         .setDefaultPermission(true),
     /**
-     * @param {Discord.CommandInteraction} interaction
+     * @param {import('discord.js').CommandInteraction<import('discord.js').CacheType>} interaction
      */
     async execute(interaction) {
-        const data = interaction.options.data;
-        const [category] = data;
-        const userId = data.length === 1 ? interaction.member.id : data[1].user.id;
-        const res = await query(interaction.client, category.value, userId, 1);
+        const { options } = interaction;
+        const category = options.getString('category');
+        const userId = options.getUser('user') ?? interaction.member.id;
+        const res = await query(interaction.client, category, userId, 1);
         await interaction.reply(res);
     },
     /**
-     * @param {Discord.SelectMenuInteraction} interaction
+     * @param {import('discord.js').SelectMenuInteraction} interaction
      */
     async update(interaction) {
         const [embed] = interaction.message.embeds;

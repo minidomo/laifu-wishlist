@@ -3,34 +3,14 @@
 require('./init').run();
 
 const Discord = require('discord.js');
-const fs = require('fs');
 
 const Laifu = require('laifu-util');
 const wishlistDatabase = require('./wishlist-database');
 const laifuDatabase = require('./laifu-database');
+const commandLoader = require('./command-loader');
 
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] });
-
-const loadCommands = () => {
-    client.commands = new Discord.Collection();
-    const commandFiles = fs.readdirSync('./src/commands').filter(file => file.endsWith('.js'));
-    for (const file of commandFiles) {
-        const command = require(`./commands/${file}`);
-        client.commands.set(command.data.name, command);
-    }
-
-    const permissions = [
-        {
-            id: process.env.OWNER_USER_ID,
-            type: 'USER',
-            permission: true,
-        },
-    ];
-    client.guilds.cache.forEach(async guild => {
-        const commands = await guild.commands.fetch();
-        commands.forEach(command => command.permissions.set({ permissions }));
-    });
-};
+commandLoader.init({ client });
 
 /**
  * @param {Discord.Message} message
@@ -61,24 +41,24 @@ const laifuFunction = async message => {
             });
         }
     } else if (Identifier.isWishlistEmbed(embed)) {
-        const res = Laifu.EmbedParser.parseWishlistEmbed(embed);
-        if (res.username) {
-            message.guild.members.fetch({ query: res.username, limit: 1 })
-                .then(users => {
-                    const user = users.first();
-                    if (!res.charactersWanted || !user) return;
-                    res.characters.forEach(character => {
-                        wishlistDatabase.add(user.id, 'gid', character.gid, '123456789');
-                    });
-                })
-                .catch(console.error);
-        }
+        // Const res = Laifu.EmbedParser.parseWishlistEmbed(embed);
+        // if (res.username) {
+        //     message.guild.members.fetch({ query: res.username, limit: 1 })
+        //         .then(users => {
+        //             const user = users.first();
+        //             if (!res.charactersWanted || !user) return;
+        //             res.characters.forEach(character => {
+        //                 wishlistDatabase.add(user.id, 'gid', character.gid, '123456789');
+        //             });
+        //         })
+        //         .catch(console.error);
+        // }
     }
 };
 
 client.once('ready', () => {
     console.log(`Logged in as ${client.user.tag}`);
-    loadCommands();
+    commandLoader.load();
     setInterval(() => {
         wishlistDatabase.export();
         laifuDatabase.load();

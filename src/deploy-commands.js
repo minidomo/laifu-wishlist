@@ -12,7 +12,7 @@ const commands = fs.readdirSync('./src/commands')
     .filter(file => file.endsWith('.js'))
     .map(filename => require(`./commands/${filename}`).data.toJSON());
 const rest = new REST({ version: '9' }).setToken(process.env.BOT_TOKEN);
-const guildIds = process.env.BOT_TOKEN === process.env.DEV_TOKEN ? config.guilds.dev : config.guilds.prod;
+const guildIds = process.env.CURRENT_BRANCH === 'dev' ? config.dev.guilds : config.prod.guilds;
 
 for (const guildId of guildIds) {
     rest.put(Routes.applicationGuildCommands(process.env.CLIENT_ID, guildId), { body: commands })

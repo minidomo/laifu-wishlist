@@ -4,6 +4,9 @@ const fs = require('fs');
 const jsonpack = require('jsonpack');
 const config = require('../config.json');
 
+const dataPath = process.env.CURRENT_BRANCH === 'dev' ?
+    config.dev.database.wishlist.path : config.prod.database.wishlist.path;
+
 /**
  * @typedef {Object} DatabaseValue
  * @property {Map<number,Set<number>>} gids
@@ -14,10 +17,9 @@ const config = require('../config.json');
  * @returns {Map<string,DatabaseValue}
  */
 const load = () => {
-    const loc = config.database.wishlist.path;
     let data;
-    if (fs.existsSync(loc)) {
-        const raw = fs.readFileSync(loc, { encoding: 'utf-8' });
+    if (fs.existsSync(dataPath)) {
+        const raw = fs.readFileSync(dataPath, { encoding: 'utf-8' });
         data = jsonpack.unpack(raw);
     } else {
         console.log('Created wishlist data');
@@ -62,84 +64,90 @@ module.exports = {
             arr.push(obj);
         });
         const packed = jsonpack.pack(arr);
-        const path = config.database.wishlist.path;
-        const directoryPath = path.substring(0, path.lastIndexOf('/'));
+        const directoryPath = dataPath.substring(0, dataPath.lastIndexOf('/'));
         if (!fs.existsSync(directoryPath)) {
             fs.mkdirSync(directoryPath, { recursive: true });
         }
-        fs.writeFileSync(path, packed, { encoding: 'utf-8' });
+        fs.writeFileSync(dataPath, packed, { encoding: 'utf-8' });
         console.log('Overwrote wishlist data');
     },
     /**
-     * @param {string} userId
+     * @param {Object} data
+     * @param {string} data.userId
      */
-    make(userId) {
-        database.set(userId, {
+    make(data) {
+        database.set(data.userId, {
             gids: new Map(),
             sids: new Set(),
         });
     },
     /**
-     * @param {string} userId
-     * @param {string} category
-     * @param {number} id
-     * @param {string} cardNumbers
+     * @param {Object} data
+     * @param {string} data.userId
+     * @param {string} data.category
+     * @param {number} data.id
+     * @param {string=} data.cardNumbers
      */
-    add(userId, category, id, cardNumbers) {
-        if (!database.has(userId)) this.make(userId);
-        const { gids, sids } = database.get(userId);
-        if (category === 'gid') {
-            if (!gids.has(id)) gids.set(id, new Set());
-            for (const c of cardNumbers) {
-                if (c >= '0' && c <= '9') {
-                    gids.get(id).add(parseInt(c));
-                }
+    add(data) {
+        if (!database.has(data.userId)) this.make({ userId: data.userId });
+        const { gids, sids } = database.get(data.userId);
+        if (data.category === 'gid') {
+            if (!gids.has(data.id)) gids.set(data.id, new Set());
+            const cardNums = gids.get(data.id);
+            if (data.cardNumbers) {
+                for (const c of data.cardNumbers) cardNums.add(parseInt(c));
+            } else {
+                for (let i = 1; i < 10; i++) cardNums.add(i);
             }
         } else {
-            sids.add(id);
+            sids.add(data.id);
         }
     },
     /**
-     * @param {string} userId
-     * @param {string} category
-     * @param {number} id
-     * @param {string} cardNumbers
+     * @param {Object} data
+     * @param {string} data.userId
+     * @param {string} data.category
+     * @param {number} data.id
+     * @param {string=} data.cardNumbers
      */
-    remove(userId, category, id, cardNumbers) {
-        if (!database.has(userId)) this.make(userId);
-        const { gids, sids } = database.get(userId);
-        if (category === 'gid') {
-            if (gids.has(id)) {
-                for (const c of cardNumbers) {
-                    if (c >= '0' && c <= '9') {
-                        gids.get(id).delete(parseInt(c));
-                    }
+    remove(data) {
+        if (!database.has(data.userId)) this.make({ userId: data.userId });
+        const { gids, sids } = database.get(data.userId);
+        if (data.category === 'gid') {
+            if (gids.has(data.id)) {
+                const cardNums = gids.get(data.id);
+                if (data.cardNumbers) {
+                    for (const c of data.cardNumbers) cardNums.delete(parseInt(c));
+                } else {
+                    cardNums.clear();
                 }
-                if (gids.get(id).size === 0) gids.delete(id);
+                if (cardNums.size === 0) gids.delete(data.id);
             }
         } else {
-            sids.delete(id);
+            sids.delete(data.id);
         }
     },
     /**
-     * @param {string} userId
+     * @param {Object} data
+     * @param {string} data.userId
      * @returns {?DatabaseValue}
      */
-    query(userId) {
-        return database.has(userId) ? database.get(userId) : null;
+    query(data) {
+        return database.has(data.userId) ? database.get(data.userId) : null;
     },
     /**
-     * @param {number} gid
-     * @param {number} sid
-     * @param {number} cardNumber
+     * @param {Object} data
+     * @param {number} data.gid
+     * @param {number} data.sid
+     * @param {number} data.cardNumber
      * @returns {string[]}
      */
-    search(gid, sid, cardNumber) {
+    search(data) {
         const users = [];
-        database.forEach((data, userId) => {
-            if (data.sids.has(sid)) {
+        database.forEach((dataValue, userId) => {
+            if (dataValue.sids.has(data.sid)) {
                 users.push(userId);
-            } else if (data.gids.has(gid) && data.gids.get(gid).has(cardNumber)) {
+            } else if (dataValue.gids.has(data.gid) && dataValue.gids.get(data.gid).has(data.cardNumber)) {
                 users.push(userId);
             }
         });

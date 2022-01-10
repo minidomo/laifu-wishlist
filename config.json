@@ -2,19 +2,28 @@
     "database": {
         "laifu": {
             "path": "../laifu-data-gatherer/data/characters-packed.txt"
-        },
-        "wishlist": {
-            "path": "./data/wishlist-packed.txt"
         }
     },
     "logs": {
         "dir": "./logs"
     },
-    "guilds": {
-        "dev": [
+    "dev": {
+        "database": {
+            "wishlist": {
+                "path": "./data/dev-wishlist-packed.txt"
+            }
+        },
+        "guilds": [
             "263901367234592768"
-        ],
-        "prod": [
+        ]
+    },
+    "prod": {
+        "database": {
+            "wishlist": {
+                "path": "./data/wishlist-packed.txt"
+            }
+        },
+        "guilds": [
             "327301554233278465"
         ]
     }

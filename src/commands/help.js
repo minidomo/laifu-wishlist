@@ -15,6 +15,9 @@ module.exports = {
         .setName('help')
         .setDescription('Displays available commands')
         .setDefaultPermission(true),
+    /**
+     * @param {import('discord.js').CommandInteraction<import('discord.js').CacheType>} interaction
+     */
     async execute(interaction) {
         const embed = new Discord.MessageEmbed()
             .setTitle('Commands')

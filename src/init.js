@@ -54,9 +54,11 @@ module.exports = {
         if (process.argv.length > 2 && process.argv[2] === '--production') {
             process.env.BOT_TOKEN = process.env.PROD_TOKEN;
             process.env.CLIENT_ID = process.env.PROD_CLIENT_ID;
+            process.env.CURRENT_BRANCH = 'prod';
         } else {
             process.env.BOT_TOKEN = process.env.DEV_TOKEN;
             process.env.CLIENT_ID = process.env.DEV_CLIENT_ID;
+            process.env.CURRENT_BRANCH = 'dev';
         }
     },
 };

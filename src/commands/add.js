@@ -3,42 +3,103 @@
 const Builders = require('@discordjs/builders');
 const wishlistDatabase = require('../wishlist-database');
 
+const idsRegex = /^([0-9]+)(?:\.([0-9]+))?$/;
+const MAX_IDS = 20;
+
+/**
+ * @typedef {Object} IdInfo
+ * @property {number} id
+ * @property {string} cardNumbers
+ */
+
+/**
+ * @param {string} str
+ * @returns {IdInfo[]}
+ */
+const parseIds = str =>
+    str
+        .split(/,+/)
+        .map(e => e.trim())
+        .filter(e => e.length > 0 && e.match(idsRegex))
+        .map(e => {
+            const parts = e.match(idsRegex);
+            /** @type {IdInfo} */
+            const obj = {
+                id: parseInt(parts[1]),
+                cardNumbers: typeof parts[2] === 'string' ? parts[2] : undefined,
+            };
+            return obj;
+        });
+
 module.exports = {
     data: new Builders.SlashCommandBuilder()
         .setName('add')
         .setDescription('Add a character or series to your wishlist')
-        .addStringOption(option =>
-            option.setName('category')
-                .setDescription('The category to be added')
-                .setRequired(true)
-                .setChoices([
-                    ['Character', 'gid'],
-                    ['Series', 'sid'],
-                ]),
-        )
-        .addIntegerOption(option =>
-            option.setName('id')
-                .setDescription('The id of the character/series')
-                .setRequired(true),
-        )
-        .addStringOption(option =>
-            option.setName('card_numbers')
-                .setDescription('The card numbers to look for. Only type the numbers (no spaces).'
-                    + ' All numbers are added by default.')
-                .setRequired(false),
-        )
-        .setDefaultPermission(true),
+        .addSubcommand(subcommand =>
+            subcommand
+                .addStringOption(option =>
+                    option
+                        .setName('category')
+                        .setDescription('The category to be added')
+                        .setRequired(true)
+                        .setChoices([
+                            ['Character', 'gid'],
+                            ['Series', 'sid'],
+                        ]))
+                .addIntegerOption(option =>
+                    option
+                        .setName('id')
+                        .setDescription('The ID of the character/series')
+                        .setRequired(true))
+                .addStringOption(option =>
+                    option
+                        .setName('card_numbers')
+                        .setDescription('The card numbers to look for. Only type the numbers (no spaces).'
+                            + ' All numbers are added by default.')
+                        .setRequired(false))
+                .setDescription('Add a single entry')
+                .setName('single'))
+        .addSubcommand(subcommand =>
+            subcommand
+                .addStringOption(option =>
+                    option
+                        .setName('category')
+                        .setDescription('The category to be added')
+                        .setRequired(true)
+                        .setChoices([
+                            ['Character', 'gid'],
+                            ['Series', 'sid'],
+                        ]))
+                .addStringOption(option =>
+                    option
+                        .setRequired(true)
+                        .setDescription(`The IDs of the characters/series. Can add at most ${MAX_IDS} IDs at once.`)
+                        .setName('ids'))
+                .setDescription('Add multiple entries')
+                .setName('multiple'))
+        .setDefaultPermission(false),
+    /**
+     * @param {import('discord.js').CommandInteraction} interaction
+     */
     async execute(interaction) {
-        const data = interaction.options.data;
-        const [category, id] = data;
-        const cardNumbers = data.length === 2 ? '123456789' : data[2].value;
-        wishlistDatabase.add(interaction.member.id, category.value, id.value, cardNumbers);
-        let ret = 'Added ';
-        if (category.value === 'gid') {
-            ret += `GID ${id.value} - Card Numbers: ${cardNumbers}`;
+        const { options } = interaction;
+        const subcommand = options.getSubcommand();
+        const category = options.getString('category');
+        const userId = interaction.member.id;
+        if (subcommand === 'single') {
+            const id = options.getInteger('id');
+            const cardNumbers = options.getString('card_numbers');
+            wishlistDatabase.add({ userId, category, id, cardNumbers });
         } else {
-            ret += `SID ${id.value}`;
+            const ids = parseIds(options.getString('ids'));
+            if (ids.length > MAX_IDS) {
+                await interaction.reply({ content: `${MAX_IDS} ID limit reached: ${ids.length}`, ephemeral: true });
+                return;
+            }
+            ids.forEach(e => {
+                wishlistDatabase.add({ userId, category, id: e.id, cardNumbers: e.cardNumbers });
+            });
         }
-        await interaction.reply({ content: ret, ephemeral: true });
+        await interaction.reply({ content: 'Added the IDs to your wishlist!', ephemeral: true });
     },
 };
