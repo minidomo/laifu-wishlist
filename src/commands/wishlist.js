@@ -115,7 +115,7 @@ const generatePageOptions = (queryResult, category) => {
 const query = async (client, category, userId, page) => {
     const queryResult = wishlistDatabase.query({ userId });
     if (queryResult === null) {
-        return { content: `No user was found with the id: ${userId}` };
+        return { content: `No user was found with the id: \`${userId}\`` };
     }
     const user = await client.users.fetch(userId);
 
@@ -164,7 +164,7 @@ module.exports = {
     async execute(interaction) {
         const { options } = interaction;
         const category = options.getString('category');
-        const userId = options.getUser('user') ?? interaction.member.id;
+        const userId = options.getUser('user')?.id ?? interaction.member.id;
         const res = await query(interaction.client, category, userId, 1);
         await interaction.reply(res);
     },
