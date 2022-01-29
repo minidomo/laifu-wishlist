@@ -11,6 +11,7 @@ const commandLoader = require('./command-loader');
 
 const client = new Discord.Client({ intents: [Discord.Intents.FLAGS.GUILDS, Discord.Intents.FLAGS.GUILD_MESSAGES] });
 commandLoader.init({ client });
+const _laifuEmbedSet = new Set();
 
 /**
  * @param {Discord.Message} message
@@ -62,6 +63,7 @@ client.once('ready', () => {
     setInterval(() => {
         wishlistDatabase.export();
         laifuDatabase.load();
+        _laifuEmbedSet.clear();
     }, 1000 * 60 * 10);
 });
 
@@ -83,14 +85,14 @@ client.on('interactionCreate', async interaction => {
 client.on('messageCreate', async message => {
     if (!client.application?.owner) await client.application?.fetch();
 
-    Laifu.Util.hasLaifuEmbed(message, { loaded: false, duplicates: false })
+    Laifu.Util.hasLaifuEmbed(message, { loaded: false, duplicates: false, embedSet: _laifuEmbedSet })
         .then(laifuFunction);
 });
 
 client.on('messageUpdate', async message => {
     if (!client.application?.owner) await client.application?.fetch();
 
-    Laifu.Util.hasLaifuEmbed(message, { delay: 1000, load: false, duplicates: false })
+    Laifu.Util.hasLaifuEmbed(message, { delay: 1000, load: false, duplicates: false.valueOf, embedSet: _laifuEmbedSet })
         .then(laifuFunction);
 });
 

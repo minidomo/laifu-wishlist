@@ -23,7 +23,7 @@
     "discord.js": "^13.6.0",
     "dotenv": "^14.3.2",
     "jsonpack": "^1.1.5",
-    "laifu-util": "github:minidomo/laifu-util",
+    "laifu-util": "file:../laifu-util/laifu-util-1.0.0.tgz",
     "winston": "^3.4.0"
   },
   "devDependencies": {
