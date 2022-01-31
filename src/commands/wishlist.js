@@ -133,7 +133,7 @@ const query = async (client, category, userId, page) => {
             new Discord.MessageSelectMenu()
                 .setCustomId('wishlist')
                 .setPlaceholder(`Page ${page}`)
-                .addOptions(generatePageOptions(queryResult)),
+                .addOptions(generatePageOptions(queryResult, category)),
         );
 
     return { embeds: [embed], components: [row] };
