@@ -64,7 +64,7 @@ client.once('ready', () => {
         wishlistDatabase.export();
         laifuDatabase.load();
         _laifuEmbedSet.clear();
-    }, 1000 * 60 * 10);
+    }, 1000 * 60 * 30);
 });
 
 client.on('interactionCreate', async interaction => {
