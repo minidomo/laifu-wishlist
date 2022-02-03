@@ -92,7 +92,7 @@ client.on('messageCreate', async message => {
 client.on('messageUpdate', async message => {
     if (!client.application?.owner) await client.application?.fetch();
 
-    Laifu.Util.hasLaifuEmbed(message, { delay: 1000, load: false, duplicates: false.valueOf, embedSet: _laifuEmbedSet })
+    Laifu.Util.hasLaifuEmbed(message, { delay: 1000, load: false, duplicates: false, embedSet: _laifuEmbedSet })
         .then(laifuFunction);
 });
 
